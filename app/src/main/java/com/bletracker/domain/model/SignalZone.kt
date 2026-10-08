@@ -2,20 +2,23 @@ package com.bletracker.domain.model
 
 enum class SignalZone(
     val title: String,
+    val badgeLabel: String,
     val subtitle: String,
     val distanceDescription: String,
     val minRssi: Int,
     val maxRssi: Int
 ) {
     IMMEDIATE(
-        title = "Sangat Kuat",
+        title = "Sangat Kuat (Sangat Dekat)",
+        badgeLabel = "Sangat Kuat",
         subtitle = "Sangat Dekat",
         distanceDescription = "< 1 meter",
         minRssi = -30,
         maxRssi = -10
     ),
     NEAR(
-        title = "Kuat",
+        title = "Kuat (Dekat)",
+        badgeLabel = "Kuat",
         subtitle = "Dekat",
         distanceDescription = "1 – 3 meter",
         minRssi = -50,
@@ -23,6 +26,7 @@ enum class SignalZone(
     ),
     MID(
         title = "Cukup / Baik",
+        badgeLabel = "Cukup / Baik",
         subtitle = "Sedang",
         distanceDescription = "3 – 10 meter",
         minRssi = -70,
@@ -30,22 +34,25 @@ enum class SignalZone(
     ),
     WEAK(
         title = "Lemah",
+        badgeLabel = "Lemah",
         subtitle = "Jauh",
         distanceDescription = "10 – 20 meter",
         minRssi = -80,
         maxRssi = -70
     ),
     VERY_WEAK(
-        title = "Sangat Lemah",
+        title = "Sangat Lemah / Putus-putus",
+        badgeLabel = "Sangat Lemah",
         subtitle = "Putus-putus",
-        distanceDescription = "> 20 meter",
+        distanceDescription = "> 20 meter (Batas jangkauan)",
         minRssi = -90,
         maxRssi = -80
     ),
     LOST(
-        title = "Sinyal Hilang",
+        title = "Sinyal Hilang (Lost)",
+        badgeLabel = "Sinyal Hilang",
         subtitle = "Terputus",
-        distanceDescription = "Di luar jangkauan",
+        distanceDescription = "Terputus / Di luar jangkauan",
         minRssi = Int.MIN_VALUE,
         maxRssi = -90
     );

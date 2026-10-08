@@ -75,7 +75,7 @@ fun SignalBadge(
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
-            text = zone.title,
+            text = zone.badgeLabel,
             color = zoneColor,
             fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold

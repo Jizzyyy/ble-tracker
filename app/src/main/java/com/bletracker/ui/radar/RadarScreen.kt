@@ -296,13 +296,13 @@ private fun DistanceZoneHeroCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = if (isLost) "Sinyal Hilang" else zone.title,
-                    fontSize = 16.sp,
+                    text = if (isLost) SignalZone.LOST.title else zone.title,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = zoneColor
                 )
                 Text(
-                    text = if (isLost) "Di luar jangkauan" else zone.distanceDescription,
+                    text = if (isLost) SignalZone.LOST.distanceDescription else zone.distanceDescription,
                     fontSize = 11.sp,
                     color = TextSecondary
                 )
