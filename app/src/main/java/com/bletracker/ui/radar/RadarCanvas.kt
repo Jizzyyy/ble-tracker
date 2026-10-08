@@ -28,9 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bletracker.domain.model.SignalZone
 import com.bletracker.ui.components.getColor
-import com.bletracker.ui.theme.PrimaryCyan
-import com.bletracker.ui.theme.SurfaceBorderDark
-import com.bletracker.ui.theme.TextTertiary
+import com.bletracker.ui.theme.PrimaryBlue
+import com.bletracker.ui.theme.SurfaceBorderLight
 import com.bletracker.ui.theme.ZoneLost
 import kotlin.math.cos
 import kotlin.math.sin
@@ -82,28 +81,28 @@ fun RadarCanvas(
             // Concentric zone rings (5 rings: 1m, 3m, 10m, 20m, >20m)
             val ringFractions = floatArrayOf(0.22f, 0.42f, 0.62f, 0.82f, 1.0f)
 
-            // Background ambient grid
+            // Background ambient grid (Light Mode clean slate lines)
             ringFractions.forEach { fraction ->
                 drawCircle(
-                    color = SurfaceBorderDark.copy(alpha = 0.45f),
+                    color = Color(0xFFCBD5E1),
                     radius = maxRadius * fraction,
                     center = center,
                     style = Stroke(
                         width = 1.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f)
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
                     )
                 )
             }
 
             // Crosshair axes
             drawLine(
-                color = SurfaceBorderDark.copy(alpha = 0.35f),
+                color = SurfaceBorderLight,
                 start = Offset(center.x - maxRadius, center.y),
                 end = Offset(center.x + maxRadius, center.y),
                 strokeWidth = 1.dp.toPx()
             )
             drawLine(
-                color = SurfaceBorderDark.copy(alpha = 0.35f),
+                color = SurfaceBorderLight,
                 start = Offset(center.x, center.y - maxRadius),
                 end = Offset(center.x, center.y + maxRadius),
                 strokeWidth = 1.dp.toPx()
@@ -115,8 +114,8 @@ fun RadarCanvas(
                     brush = Brush.sweepGradient(
                         colors = listOf(
                             Color.Transparent,
-                            PrimaryCyan.copy(alpha = 0.04f),
-                            PrimaryCyan.copy(alpha = 0.22f)
+                            PrimaryBlue.copy(alpha = 0.03f),
+                            PrimaryBlue.copy(alpha = 0.16f)
                         ),
                         center = center
                     ),
@@ -129,9 +128,8 @@ fun RadarCanvas(
             }
 
             // Target blip position mapping
-            // Distance mapped to radius fraction:
             val targetFraction = when {
-                isLost -> 0.98f
+                isLost -> 0.96f
                 estimatedDistance < 1.0 -> 0.16f + (estimatedDistance.toFloat().coerceIn(0f, 1f) * 0.06f)
                 estimatedDistance <= 3.0 -> 0.22f + (((estimatedDistance.toFloat() - 1f) / 2f) * 0.20f)
                 estimatedDistance <= 10.0 -> 0.42f + (((estimatedDistance.toFloat() - 3f) / 7f) * 0.20f)
@@ -149,8 +147,8 @@ fun RadarCanvas(
 
             if (!isLost) {
                 // Expanding pulse halo
-                val haloRadius = 10.dp.toPx() + (pulseProgress * 24.dp.toPx())
-                val haloAlpha = (1f - pulseProgress).coerceIn(0f, 1f) * 0.6f
+                val haloRadius = 10.dp.toPx() + (pulseProgress * 22.dp.toPx())
+                val haloAlpha = (1f - pulseProgress).coerceIn(0f, 1f) * 0.35f
                 drawCircle(
                     color = activeColor.copy(alpha = haloAlpha),
                     radius = haloRadius,
@@ -174,21 +172,21 @@ fun RadarCanvas(
             } else {
                 // Lost marker: dim hollow ring
                 drawCircle(
-                    color = ZoneLost.copy(alpha = 0.5f),
+                    color = ZoneLost.copy(alpha = 0.6f),
                     radius = 8.dp.toPx(),
                     center = blipCenter,
                     style = Stroke(width = 2.dp.toPx())
                 )
             }
 
-            // Center radar station dot
+            // Center radar station dot (User)
             drawCircle(
-                color = PrimaryCyan,
+                color = PrimaryBlue,
                 radius = 4.dp.toPx(),
                 center = center
             )
             drawCircle(
-                color = PrimaryCyan.copy(alpha = 0.3f),
+                color = PrimaryBlue.copy(alpha = 0.2f),
                 radius = 8.dp.toPx(),
                 center = center
             )
@@ -196,8 +194,8 @@ fun RadarCanvas(
 
         // Distance indicators around center
         Text(
-            text = "YOU",
-            color = PrimaryCyan.copy(alpha = 0.8f),
+            text = "ANDA",
+            color = PrimaryBlue,
             fontSize = 9.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(top = 22.dp)

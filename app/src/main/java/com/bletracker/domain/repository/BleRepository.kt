@@ -7,9 +7,10 @@ interface BleRepository {
     val devices: StateFlow<List<BleDevice>>
     val isScanning: StateFlow<Boolean>
     val scanError: StateFlow<String?>
-    val isBluetoothEnabled: Boolean
+    val isBluetoothEnabled: StateFlow<Boolean>
 
     fun startScan()
     fun stopScan()
     fun getDevice(address: String): BleDevice?
+    fun refreshBluetoothStatus()
 }

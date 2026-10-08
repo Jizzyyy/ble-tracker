@@ -49,12 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bletracker.domain.model.BleDevice
+import com.bletracker.ui.components.ScannerSkeletonList
 import com.bletracker.ui.components.SignalBadge
 import com.bletracker.ui.components.getColor
-import com.bletracker.ui.theme.BackgroundDark
-import com.bletracker.ui.theme.PrimaryCyan
-import com.bletracker.ui.theme.SurfaceBorderDark
-import com.bletracker.ui.theme.SurfaceDark
+import com.bletracker.ui.theme.BackgroundLight
+import com.bletracker.ui.theme.SurfaceBorderLight
+import com.bletracker.ui.theme.SurfaceLight
+import com.bletracker.ui.theme.SurfaceSubtle
 import com.bletracker.ui.theme.TextPrimary
 import com.bletracker.ui.theme.TextSecondary
 import com.bletracker.ui.theme.TextTertiary
@@ -72,7 +73,7 @@ fun HistoryScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(BackgroundDark)
+            .background(BackgroundLight)
             .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -102,8 +103,8 @@ fun HistoryScreen(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(SurfaceDark)
-                        .border(1.dp, SurfaceBorderDark, CircleShape)
+                        .background(SurfaceLight)
+                        .border(1.dp, SurfaceBorderLight, CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.DeleteSweep,
@@ -115,7 +116,7 @@ fun HistoryScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Search in History
         TextField(
@@ -123,8 +124,8 @@ fun HistoryScreen(
             onValueChange = { viewModel.onSearchQueryChanged(it) },
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .border(1.dp, SurfaceBorderDark, RoundedCornerShape(14.dp)),
+                .clip(RoundedCornerShape(12.dp))
+                .border(1.dp, SurfaceBorderLight, RoundedCornerShape(12.dp)),
             placeholder = {
                 Text(
                     text = "Cari di riwayat...",
@@ -154,8 +155,8 @@ fun HistoryScreen(
             },
             singleLine = true,
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = SurfaceDark,
-                unfocusedContainerColor = SurfaceDark,
+                focusedContainerColor = SurfaceLight,
+                unfocusedContainerColor = SurfaceLight,
                 focusedTextColor = TextPrimary,
                 unfocusedTextColor = TextPrimary,
                 focusedIndicatorColor = Color.Transparent,
@@ -163,26 +164,32 @@ fun HistoryScreen(
             )
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-        // Device History List or Empty View
-        if (uiState.devices.isEmpty()) {
-            EmptyHistoryPlaceholder(hasFilter = uiState.searchQuery.isNotBlank())
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(
-                    items = uiState.devices,
-                    key = { it.address }
-                ) { device ->
-                    HistoryDeviceItem(
-                        device = device,
-                        formattedTime = viewModel.formatLastSeen(device.lastSeenTimestamp),
-                        onClick = { onDeviceClick(device.address) }
-                    )
+        // Device History List, Skeleton, or Empty View
+        when {
+            uiState.isLoading -> {
+                ScannerSkeletonList(count = 3, modifier = Modifier.padding(vertical = 8.dp))
+            }
+            uiState.devices.isEmpty() -> {
+                EmptyHistoryPlaceholder(hasFilter = uiState.searchQuery.isNotBlank())
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(
+                        items = uiState.devices,
+                        key = { it.address }
+                    ) { device ->
+                        HistoryDeviceItem(
+                            device = device,
+                            formattedTime = viewModel.formatLastSeen(device.lastSeenTimestamp),
+                            onClick = { onDeviceClick(device.address) }
+                        )
+                    }
                 }
             }
         }
@@ -196,7 +203,7 @@ fun HistoryScreen(
             },
             text = {
                 Text(
-                    "Semua catatan riwayat perangkat Bluetooth yang tersimpan di perangkat ini akan dihapus permanen.",
+                    "Semua catatan riwayat perangkat Bluetooth yang tersimpan di database perangkat ini akan dihapus permanen.",
                     color = TextSecondary
                 )
             },
@@ -215,7 +222,7 @@ fun HistoryScreen(
                     Text("Batal", color = TextSecondary)
                 }
             },
-            containerColor = SurfaceDark
+            containerColor = SurfaceLight
         )
     }
 }
@@ -232,8 +239,8 @@ private fun HistoryDeviceItem(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(SurfaceDark)
-            .border(1.dp, SurfaceBorderDark.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+            .background(SurfaceLight)
+            .border(1.dp, SurfaceBorderLight, RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
             .padding(16.dp)
     ) {
@@ -266,7 +273,7 @@ private fun HistoryDeviceItem(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                     contentDescription = null,
                     tint = TextTertiary,
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(13.dp)
                 )
             }
 
@@ -276,7 +283,8 @@ private fun HistoryDeviceItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFF0C121D))
+                    .background(SurfaceSubtle)
+                    .border(1.dp, SurfaceBorderLight.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -334,7 +342,7 @@ private fun EmptyHistoryPlaceholder(hasFilter: Boolean) {
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = if (hasFilter) "Coba ubah kata kunci pencarian." else "Perangkat Bluetooth yang terdeteksi saat pemindaian akan otomatis disimpan ke database lokal.",
+                text = if (hasFilter) "Coba ubah kata kunci pencarian." else "Perangkat Bluetooth yang terdeteksi saat pemindaian akan otomatis tersimpan di database lokal.",
                 fontSize = 12.sp,
                 color = TextSecondary,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center

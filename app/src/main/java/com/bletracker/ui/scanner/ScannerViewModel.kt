@@ -20,6 +20,11 @@ data class ScannerUiState(
     val error: String? = null
 )
 
+private data class FilterCriteria(
+    val query: String,
+    val threshold: Int
+)
+
 class ScannerViewModel(
     private val bleRepository: BleRepository
 ) : ViewModel() {
@@ -27,21 +32,24 @@ class ScannerViewModel(
     private val _searchQuery = MutableStateFlow("")
     private val _rssiThreshold = MutableStateFlow(-100)
     private val _dismissedError = MutableStateFlow<String?>(null)
-    private val _bluetoothEnabled = MutableStateFlow(bleRepository.isBluetoothEnabled)
+
+    private val filterFlow = combine(_searchQuery, _rssiThreshold) { query, threshold ->
+        FilterCriteria(query, threshold)
+    }
 
     val uiState: StateFlow<ScannerUiState> = combine(
         bleRepository.devices,
         bleRepository.isScanning,
         bleRepository.scanError,
-        _searchQuery,
-        _rssiThreshold
-    ) { rawDevices, isScanning, repoError, query, threshold ->
+        bleRepository.isBluetoothEnabled,
+        filterFlow
+    ) { rawDevices, isScanning, repoError, isBtEnabled, filter ->
         val filtered = rawDevices.filter { device ->
-            val matchesQuery = query.isBlank() ||
-                (device.name?.contains(query, ignoreCase = true) == true) ||
-                device.address.contains(query, ignoreCase = true)
+            val matchesQuery = filter.query.isBlank() ||
+                (device.name?.contains(filter.query, ignoreCase = true) == true) ||
+                device.address.contains(filter.query, ignoreCase = true)
 
-            val matchesThreshold = device.smoothedRssi >= threshold
+            val matchesThreshold = device.smoothedRssi >= filter.threshold
             matchesQuery && matchesThreshold
         }
 
@@ -51,19 +59,19 @@ class ScannerViewModel(
             devices = filtered,
             totalDiscoveredCount = rawDevices.size,
             isScanning = isScanning,
-            isBluetoothEnabled = _bluetoothEnabled.value,
-            searchQuery = query,
-            rssiThreshold = threshold,
+            isBluetoothEnabled = isBtEnabled,
+            searchQuery = filter.query,
+            rssiThreshold = filter.threshold,
             error = activeError
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ScannerUiState(isBluetoothEnabled = bleRepository.isBluetoothEnabled)
+        initialValue = ScannerUiState(isBluetoothEnabled = bleRepository.isBluetoothEnabled.value)
     )
 
     fun refreshBluetoothStatus() {
-        _bluetoothEnabled.value = bleRepository.isBluetoothEnabled
+        bleRepository.refreshBluetoothStatus()
     }
 
     fun startScan() {

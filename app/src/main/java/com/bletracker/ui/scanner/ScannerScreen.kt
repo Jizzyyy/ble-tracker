@@ -57,11 +57,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bletracker.ui.components.BleRequirementCard
 import com.bletracker.ui.components.DeviceCard
-import com.bletracker.ui.theme.BackgroundDark
-import com.bletracker.ui.theme.PrimaryCyan
-import com.bletracker.ui.theme.SurfaceBorderDark
-import com.bletracker.ui.theme.SurfaceDark
-import com.bletracker.ui.theme.SurfaceVariantDark
+import com.bletracker.ui.components.ScannerSkeletonList
+import com.bletracker.ui.theme.BackgroundLight
+import com.bletracker.ui.theme.PrimaryBlue
+import com.bletracker.ui.theme.SurfaceBorderLight
+import com.bletracker.ui.theme.SurfaceLight
+import com.bletracker.ui.theme.SurfaceSubtle
 import com.bletracker.ui.theme.TextPrimary
 import com.bletracker.ui.theme.TextSecondary
 import com.bletracker.ui.theme.TextTertiary
@@ -80,7 +81,7 @@ fun ScannerScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(BackgroundDark)
+            .background(BackgroundLight)
             .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -93,7 +94,7 @@ fun ScannerScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Permissions & Bluetooth Requirements
+        // Permissions & Bluetooth Requirements (reactive StateFlow check)
         BleRequirementCard(
             isBluetoothEnabled = uiState.isBluetoothEnabled,
             onEnableBluetooth = onEnableBluetooth,
@@ -108,7 +109,7 @@ fun ScannerScreen(
             onToggle = { viewModel.toggleScan() }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Search Bar
         SearchInputBar(
@@ -116,7 +117,7 @@ fun ScannerScreen(
             onQueryChange = { viewModel.onSearchQueryChanged(it) }
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // RSSI Threshold Filter Slider
         RssiThresholdFilter(
@@ -124,7 +125,7 @@ fun ScannerScreen(
             onThresholdChange = { viewModel.onRssiThresholdChanged(it) }
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Error Banner
         AnimatedVisibility(visible = uiState.error != null) {
@@ -136,28 +137,35 @@ fun ScannerScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
-        // Device List
-        if (uiState.devices.isEmpty()) {
-            EmptyDevicePlaceholder(
-                isScanning = uiState.isScanning,
-                hasFilter = uiState.searchQuery.isNotBlank() || uiState.rssiThreshold > -100
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(
-                    items = uiState.devices,
-                    key = { it.address }
-                ) { device ->
-                    DeviceCard(
-                        device = device,
-                        onClick = { onDeviceClick(device.address) }
-                    )
+        // Device List / Skeleton / Empty State
+        when {
+            uiState.isScanning && uiState.devices.isEmpty() && uiState.searchQuery.isBlank() && uiState.rssiThreshold <= -100 -> {
+                // Skeleton loading state while scanning for nearby devices
+                ScannerSkeletonList(count = 3, modifier = Modifier.padding(vertical = 8.dp))
+            }
+            uiState.devices.isEmpty() -> {
+                EmptyDevicePlaceholder(
+                    isScanning = uiState.isScanning,
+                    hasFilter = uiState.searchQuery.isNotBlank() || uiState.rssiThreshold > -100
+                )
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(
+                        items = uiState.devices,
+                        key = { it.address }
+                    ) { device ->
+                        DeviceCard(
+                            device = device,
+                            onClick = { onDeviceClick(device.address) }
+                        )
+                    }
                 }
             }
         }
@@ -191,15 +199,15 @@ private fun ScannerHeader(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .background(SurfaceDark)
-                .border(1.dp, SurfaceBorderDark, RoundedCornerShape(20.dp))
+                .background(SurfaceLight)
+                .border(1.dp, SurfaceBorderLight, RoundedCornerShape(20.dp))
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val infiniteTransition = rememberInfiniteTransition(label = "pulse")
             val pulseScale by infiniteTransition.animateFloat(
                 initialValue = 1f,
-                targetValue = 1.4f,
+                targetValue = 1.35f,
                 animationSpec = infiniteRepeatable(
                     animation = tween(1000, easing = FastOutSlowInEasing),
                     repeatMode = RepeatMode.Reverse
@@ -236,11 +244,11 @@ private fun ScanControlButton(
         onClick = onToggle,
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp),
-        shape = RoundedCornerShape(14.dp),
+            .height(48.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isScanning) ZoneVeryWeak else PrimaryCyan,
-            contentColor = if (isScanning) TextPrimary else BackgroundDark
+            containerColor = if (isScanning) ZoneVeryWeak else PrimaryBlue,
+            contentColor = Color.White
         )
     ) {
         Icon(
@@ -251,8 +259,8 @@ private fun ScanControlButton(
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = if (isScanning) "Hentikan Pemindaian" else "Mulai Pemindaian BLE",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
@@ -267,8 +275,8 @@ private fun SearchInputBar(
         onValueChange = onQueryChange,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .border(1.dp, SurfaceBorderDark, RoundedCornerShape(14.dp)),
+            .clip(RoundedCornerShape(12.dp))
+            .border(1.dp, SurfaceBorderLight, RoundedCornerShape(12.dp)),
         placeholder = {
             Text(
                 text = "Cari nama perangkat atau MAC address...",
@@ -298,8 +306,8 @@ private fun SearchInputBar(
         },
         singleLine = true,
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = SurfaceDark,
-            unfocusedContainerColor = SurfaceDark,
+            focusedContainerColor = SurfaceLight,
+            unfocusedContainerColor = SurfaceLight,
             focusedTextColor = TextPrimary,
             unfocusedTextColor = TextPrimary,
             focusedIndicatorColor = Color.Transparent,
@@ -316,9 +324,9 @@ private fun RssiThresholdFilter(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(SurfaceDark)
-            .border(1.dp, SurfaceBorderDark, RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(12.dp))
+            .background(SurfaceLight)
+            .border(1.dp, SurfaceBorderLight, RoundedCornerShape(12.dp))
             .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
         Row(
@@ -330,7 +338,7 @@ private fun RssiThresholdFilter(
                 Icon(
                     imageVector = Icons.Default.Tune,
                     contentDescription = null,
-                    tint = PrimaryCyan,
+                    tint = PrimaryBlue,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -346,7 +354,7 @@ private fun RssiThresholdFilter(
                 text = if (threshold <= -100) "Semua Sinyal" else "≥ $threshold dBm",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (threshold <= -100) TextTertiary else PrimaryCyan
+                color = if (threshold <= -100) TextTertiary else PrimaryBlue
             )
         }
 
@@ -356,9 +364,9 @@ private fun RssiThresholdFilter(
             valueRange = -100f..-30f,
             steps = 13,
             colors = SliderDefaults.colors(
-                thumbColor = PrimaryCyan,
-                activeTrackColor = PrimaryCyan,
-                inactiveTrackColor = SurfaceVariantDark
+                thumbColor = PrimaryBlue,
+                activeTrackColor = PrimaryBlue,
+                inactiveTrackColor = SurfaceSubtle
             )
         )
     }
@@ -373,8 +381,8 @@ private fun ErrorBanner(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(ZoneVeryWeak.copy(alpha = 0.15f))
-            .border(1.dp, ZoneVeryWeak.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+            .background(Color(0xFFFEF2F2))
+            .border(1.dp, Color(0xFFFEE2E2), RoundedCornerShape(12.dp))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -420,13 +428,13 @@ private fun EmptyDevicePlaceholder(
             Icon(
                 imageVector = Icons.Default.Radar,
                 contentDescription = null,
-                tint = if (isScanning) PrimaryCyan else TextTertiary,
+                tint = if (isScanning) PrimaryBlue else TextTertiary,
                 modifier = Modifier.size(54.dp)
             )
             Spacer(modifier = Modifier.height(14.dp))
             Text(
                 text = when {
-                    hasFilter -> "Tidak ada perangkat yang cocok dengan filter"
+                    hasFilter -> "Tidak ada perangkat yang cocok"
                     isScanning -> "Mencari perangkat BLE di sekitar..."
                     else -> "Pemindaian Belum Dimulai"
                 },

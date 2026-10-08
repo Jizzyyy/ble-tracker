@@ -58,12 +58,12 @@ import com.bletracker.ui.radar.RadarScreen
 import com.bletracker.ui.radar.RadarViewModel
 import com.bletracker.ui.scanner.ScannerScreen
 import com.bletracker.ui.scanner.ScannerViewModel
-import com.bletracker.ui.theme.BackgroundDark
+import com.bletracker.ui.theme.BackgroundLight
 import com.bletracker.ui.theme.BleTrackerTheme
-import com.bletracker.ui.theme.PrimaryCyan
-import com.bletracker.ui.theme.SurfaceBorderDark
-import com.bletracker.ui.theme.SurfaceDark
-import com.bletracker.ui.theme.TextPrimary
+import com.bletracker.ui.theme.PrimaryBlue
+import com.bletracker.ui.theme.PrimaryBlueSubtle
+import com.bletracker.ui.theme.SurfaceBorderLight
+import com.bletracker.ui.theme.SurfaceLight
 import com.bletracker.ui.theme.TextTertiary
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -125,6 +125,8 @@ fun MainAppContent() {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
                 scannerViewModel.stopScan()
+            } else if (event == Lifecycle.Event.ON_RESUME) {
+                scannerViewModel.refreshBluetoothStatus()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -137,7 +139,7 @@ fun MainAppContent() {
     val isTopLevelDestination = bottomNavItems.any { it.route == currentRoute }
 
     Scaffold(
-        containerColor = BackgroundDark,
+        containerColor = BackgroundLight,
         bottomBar = {
             AnimatedVisibility(
                 visible = isTopLevelDestination,
@@ -222,21 +224,23 @@ private fun BottomNavigationBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
+                .height(58.dp)
                 .clip(RoundedCornerShape(30.dp))
-                .background(SurfaceDark)
-                .border(1.dp, SurfaceBorderDark, RoundedCornerShape(30.dp))
+                .background(SurfaceLight)
+                .border(1.dp, SurfaceBorderLight, RoundedCornerShape(30.dp))
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
             bottomNavItems.forEach { screen ->
                 val isSelected = currentRoute == screen.route
-                val contentColor = if (isSelected) PrimaryCyan else TextTertiary
+                val contentColor = if (isSelected) PrimaryBlue else TextTertiary
+                val itemBg = if (isSelected) PrimaryBlueSubtle else androidx.compose.ui.graphics.Color.Transparent
 
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
+                        .background(itemBg)
                         .clickable { onNavigate(screen) }
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -250,7 +254,7 @@ private fun BottomNavigationBar(
                     if (isSelected) {
                         Text(
                             text = screen.title,
-                            color = PrimaryCyan,
+                            color = PrimaryBlue,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(start = 8.dp)

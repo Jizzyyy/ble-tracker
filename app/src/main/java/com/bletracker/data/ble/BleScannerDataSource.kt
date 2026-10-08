@@ -6,9 +6,15 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 
 class BleScannerDataSource(
@@ -21,18 +27,40 @@ class BleScannerDataSource(
     private val bluetoothAdapter: BluetoothAdapter?
         get() = bluetoothManager?.adapter
 
-    val isBluetoothEnabled: Boolean
-        get() = bluetoothAdapter?.isEnabled == true
+    private val _isBluetoothEnabled = MutableStateFlow(bluetoothAdapter?.isEnabled == true)
+    val isBluetoothEnabled: StateFlow<Boolean> = _isBluetoothEnabled.asStateFlow()
+
+    init {
+        // Register receiver to immediately detect hardware toggle of Bluetooth state
+        val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                if (intent?.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+                    val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
+                    _isBluetoothEnabled.value = (state == BluetoothAdapter.STATE_ON)
+                }
+            }
+        }
+        try {
+            context.applicationContext.registerReceiver(receiver, filter)
+        } catch (_: Exception) {}
+    }
+
+    fun refreshBluetoothStatus() {
+        _isBluetoothEnabled.value = bluetoothAdapter?.isEnabled == true
+    }
 
     @SuppressLint("MissingPermission")
     fun scanBle(): Flow<BleScanEvent> = callbackFlow {
         val adapter = bluetoothAdapter
         if (adapter == null || !adapter.isEnabled) {
+            _isBluetoothEnabled.value = false
             trySend(BleScanEvent.Error("Bluetooth tidak aktif atau tidak didukung."))
             close()
             return@callbackFlow
         }
 
+        _isBluetoothEnabled.value = true
         val scanner = adapter.bluetoothLeScanner
         if (scanner == null) {
             trySend(BleScanEvent.Error("Bluetooth LE Scanner tidak tersedia."))

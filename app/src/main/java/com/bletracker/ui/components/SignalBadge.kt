@@ -1,6 +1,7 @@
 package com.bletracker.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,11 +21,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bletracker.domain.model.SignalZone
 import com.bletracker.ui.theme.ZoneImmediate
+import com.bletracker.ui.theme.ZoneImmediateBg
 import com.bletracker.ui.theme.ZoneLost
+import com.bletracker.ui.theme.ZoneLostBg
 import com.bletracker.ui.theme.ZoneMid
+import com.bletracker.ui.theme.ZoneMidBg
 import com.bletracker.ui.theme.ZoneNear
+import com.bletracker.ui.theme.ZoneNearBg
 import com.bletracker.ui.theme.ZoneVeryWeak
+import com.bletracker.ui.theme.ZoneVeryWeakBg
 import com.bletracker.ui.theme.ZoneWeak
+import com.bletracker.ui.theme.ZoneWeakBg
 
 fun SignalZone.getColor(): Color = when (this) {
     SignalZone.IMMEDIATE -> ZoneImmediate
@@ -35,18 +42,29 @@ fun SignalZone.getColor(): Color = when (this) {
     SignalZone.LOST -> ZoneLost
 }
 
+fun SignalZone.getBgColor(): Color = when (this) {
+    SignalZone.IMMEDIATE -> ZoneImmediateBg
+    SignalZone.NEAR -> ZoneNearBg
+    SignalZone.MID -> ZoneMidBg
+    SignalZone.WEAK -> ZoneWeakBg
+    SignalZone.VERY_WEAK -> ZoneVeryWeakBg
+    SignalZone.LOST -> ZoneLostBg
+}
+
 @Composable
 fun SignalBadge(
     zone: SignalZone,
     modifier: Modifier = Modifier
 ) {
     val zoneColor = zone.getColor()
+    val bgColor = zone.getBgColor()
 
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(zoneColor.copy(alpha = 0.15f))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .background(bgColor)
+            .border(1.dp, zoneColor.copy(alpha = 0.25f), RoundedCornerShape(20.dp))
+            .padding(horizontal = 9.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(

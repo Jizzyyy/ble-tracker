@@ -39,10 +39,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bletracker.domain.model.SignalZone
 import com.bletracker.ui.components.SignalBadge
 import com.bletracker.ui.components.getColor
-import com.bletracker.ui.theme.BackgroundDark
-import com.bletracker.ui.theme.PrimaryCyan
-import com.bletracker.ui.theme.SurfaceBorderDark
-import com.bletracker.ui.theme.SurfaceDark
+import com.bletracker.ui.theme.BackgroundLight
+import com.bletracker.ui.theme.PrimaryBlue
+import com.bletracker.ui.theme.SurfaceBorderLight
+import com.bletracker.ui.theme.SurfaceLight
+import com.bletracker.ui.theme.SurfaceSubtle
 import com.bletracker.ui.theme.TextPrimary
 import com.bletracker.ui.theme.TextSecondary
 import com.bletracker.ui.theme.TextTertiary
@@ -66,7 +67,7 @@ fun RadarScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(BackgroundDark)
+            .background(BackgroundLight)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
     ) {
@@ -82,8 +83,8 @@ fun RadarScreen(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(SurfaceDark)
-                    .border(1.dp, SurfaceBorderDark, CircleShape)
+                    .background(SurfaceLight)
+                    .border(1.dp, SurfaceBorderLight, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -113,7 +114,7 @@ fun RadarScreen(
             SignalBadge(zone = if (isLost) SignalZone.LOST else zone)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Status Banner
         ConnectionStatusCard(
@@ -161,8 +162,8 @@ private fun ConnectionStatusCard(
     isLost: Boolean,
     secondsAgo: Long
 ) {
-    val bgColor = if (isLost) ZoneVeryWeak.copy(alpha = 0.12f) else ZoneImmediate.copy(alpha = 0.12f)
-    val borderColor = if (isLost) ZoneVeryWeak.copy(alpha = 0.4f) else ZoneImmediate.copy(alpha = 0.4f)
+    val bgColor = if (isLost) Color(0xFFFEF2F2) else Color(0xFFECFDF5)
+    val borderColor = if (isLost) Color(0xFFFEE2E2) else Color(0xFFD1FAE5)
     val iconColor = if (isLost) ZoneVeryWeak else ZoneImmediate
 
     Row(
@@ -208,8 +209,8 @@ private fun DistanceZoneHeroCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(SurfaceDark)
-            .border(1.dp, SurfaceBorderDark, RoundedCornerShape(16.dp))
+            .background(SurfaceLight)
+            .border(1.dp, SurfaceBorderLight, RoundedCornerShape(16.dp))
             .padding(18.dp)
     ) {
         Row(
@@ -223,14 +224,14 @@ private fun DistanceZoneHeroCard(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextTertiary,
-                    letterSpacing = 1.sp
+                    letterSpacing = 0.5.sp
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = if (isLost || estimatedDistance < 0) "Terputus" else "~$estimatedDistance m",
-                    fontSize = 32.sp,
+                    fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (isLost) ZoneLost else PrimaryCyan
+                    color = if (isLost) ZoneLost else PrimaryBlue
                 )
             }
 
@@ -240,7 +241,7 @@ private fun DistanceZoneHeroCard(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextTertiary,
-                    letterSpacing = 1.sp
+                    letterSpacing = 0.5.sp
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -270,8 +271,8 @@ private fun TelemetryGrid(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(SurfaceDark)
-            .border(1.dp, SurfaceBorderDark, RoundedCornerShape(16.dp))
+            .background(SurfaceLight)
+            .border(1.dp, SurfaceBorderLight, RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         Text(
@@ -279,10 +280,10 @@ private fun TelemetryGrid(
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             color = TextTertiary,
-            letterSpacing = 1.sp
+            letterSpacing = 0.5.sp
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -292,7 +293,8 @@ private fun TelemetryGrid(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF0C121D))
+                    .background(SurfaceSubtle)
+                    .border(1.dp, SurfaceBorderLight.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
                     .padding(12.dp)
             ) {
                 Column {
@@ -311,7 +313,8 @@ private fun TelemetryGrid(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF0C121D))
+                    .background(SurfaceSubtle)
+                    .border(1.dp, SurfaceBorderLight.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
                     .padding(12.dp)
             ) {
                 Column {
@@ -343,7 +346,8 @@ private fun TelemetryGrid(
                 .fillMaxWidth()
                 .height(48.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFF0C121D))
+                .background(SurfaceSubtle)
+                .border(1.dp, SurfaceBorderLight.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
                 .padding(horizontal = 8.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.Bottom
@@ -357,8 +361,7 @@ private fun TelemetryGrid(
                 }
             } else {
                 history.forEach { sample ->
-                    // Map -100..-30 dBm to bar height percentage (0..1)
-                    val fraction = ((sample + 100) / 70f).coerceIn(0.1f, 1f)
+                    val fraction = ((sample + 100) / 70f).coerceIn(0.12f, 1f)
                     Box(
                         modifier = Modifier
                             .weight(1f)

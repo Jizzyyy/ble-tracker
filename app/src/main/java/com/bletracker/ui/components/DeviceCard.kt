@@ -31,11 +31,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bletracker.domain.model.BleDevice
-import com.bletracker.ui.theme.PrimaryCyan
-import com.bletracker.ui.theme.SurfaceBorderDark
-import com.bletracker.ui.theme.SurfaceDark
+import com.bletracker.ui.theme.PrimaryBlue
+import com.bletracker.ui.theme.SurfaceBorderLight
+import com.bletracker.ui.theme.SurfaceLight
+import com.bletracker.ui.theme.SurfaceSubtle
 import com.bletracker.ui.theme.TextPrimary
-import com.bletracker.ui.theme.TextSecondary
 import com.bletracker.ui.theme.TextTertiary
 
 @Composable
@@ -45,13 +45,14 @@ fun DeviceCard(
     modifier: Modifier = Modifier
 ) {
     val zoneColor = device.zone.getColor()
+    val zoneBg = device.zone.getBgColor()
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(SurfaceDark)
-            .border(1.dp, SurfaceBorderDark.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+            .background(SurfaceLight)
+            .border(1.dp, SurfaceBorderLight, RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
             .padding(16.dp)
     ) {
@@ -64,14 +65,15 @@ fun DeviceCard(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape)
-                        .background(zoneColor.copy(alpha = 0.12f)),
+                        .background(zoneBg)
+                        .border(1.dp, zoneColor.copy(alpha = 0.2f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Bluetooth,
                         contentDescription = null,
                         tint = zoneColor,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
@@ -101,7 +103,7 @@ fun DeviceCard(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                     contentDescription = "Radar View",
                     tint = TextTertiary,
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(13.dp)
                 )
             }
 
@@ -112,7 +114,8 @@ fun DeviceCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFF0C121D))
+                    .background(SurfaceSubtle)
+                    .border(1.dp, SurfaceBorderLight.copy(alpha = 0.6f), RoundedCornerShape(10.dp))
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -132,7 +135,7 @@ fun DeviceCard(
                 MetricItem(
                     label = "Est. Jarak",
                     value = if (device.estimatedDistance > 0) "~${device.estimatedDistance} m" else "--",
-                    valueColor = PrimaryCyan
+                    valueColor = PrimaryBlue
                 )
 
                 SignalStrengthBars(rssi = device.smoothedRssi, activeColor = zoneColor)
@@ -179,7 +182,7 @@ private fun SignalStrengthBars(
 
     Row(
         verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.spacedBy(2.dp)
+        horizontalArrangement = Arrangement.spacedBy(2.5.dp)
     ) {
         for (i in 1..totalBars) {
             val barHeight = (4 + (i * 3.5)).dp
@@ -189,7 +192,7 @@ private fun SignalStrengthBars(
                     .width(3.dp)
                     .height(barHeight)
                     .clip(RoundedCornerShape(1.dp))
-                    .background(if (isLit) activeColor else SurfaceBorderDark)
+                    .background(if (isLit) activeColor else Color(0xFFCBD5E1))
             )
         }
     }
