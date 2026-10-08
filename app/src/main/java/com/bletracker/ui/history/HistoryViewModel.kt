@@ -30,17 +30,21 @@ class HistoryViewModel(
     val uiState: StateFlow<HistoryUiState> = combine(
         historyRepository.getHistoryDevices(),
         _searchQuery
-    ) { allDevices, query ->
+    ) { allDevices, rawQuery ->
+        val query = rawQuery.trim()
+        val queryNoColon = query.replace(":", "")
+
         val filtered = allDevices.filter { device ->
             query.isBlank() ||
-                (device.name?.contains(query, ignoreCase = true) == true) ||
-                device.address.contains(query, ignoreCase = true)
+                device.displayName.contains(query, ignoreCase = true) ||
+                device.address.contains(query, ignoreCase = true) ||
+                (queryNoColon.isNotBlank() && device.address.replace(":", "").contains(queryNoColon, ignoreCase = true))
         }
 
         HistoryUiState(
             devices = filtered,
             totalCount = allDevices.size,
-            searchQuery = query,
+            searchQuery = rawQuery,
             isLoading = false
         )
     }.stateIn(

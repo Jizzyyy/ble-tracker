@@ -191,14 +191,5 @@ fun RadarCanvas(
                 center = center
             )
         }
-
-        // Distance indicators around center
-        Text(
-            text = "ANDA",
-            color = PrimaryBlue,
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 22.dp)
-        )
     }
 }

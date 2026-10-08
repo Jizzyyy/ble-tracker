@@ -90,11 +90,6 @@ fun HistoryScreen(
                     style = MaterialTheme.typography.headlineMedium,
                     color = TextPrimary
                 )
-                Text(
-                    text = "Tersimpan di database Room lokal",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary
-                )
             }
 
             if (uiState.totalCount > 0) {

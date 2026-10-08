@@ -71,4 +71,22 @@ class RssiUtilTest {
         // With alpha 0.35: 0.35 * -80 + 0.65 * -50 = -28 - 32.5 = -60.5 -> -60 or -61
         assertTrue("Smoothed value must be strictly between initial and spike", smoothed in -75..-55)
     }
+
+    @Test
+    fun `displayName returns Unknown Device when name is null or blank`() {
+        val deviceNull = com.bletracker.domain.model.BleDevice(
+            name = null,
+            address = "4F:60:56:43:9D:32",
+            rssi = -56,
+            estimatedDistance = 5.3,
+            zone = SignalZone.MID
+        )
+        assertEquals("Unknown Device", deviceNull.displayName)
+
+        val deviceBlank = deviceNull.copy(name = "   ")
+        assertEquals("Unknown Device", deviceBlank.displayName)
+
+        val deviceNamed = deviceNull.copy(name = "Mi Band 7")
+        assertEquals("Mi Band 7", deviceNamed.displayName)
+    }
 }

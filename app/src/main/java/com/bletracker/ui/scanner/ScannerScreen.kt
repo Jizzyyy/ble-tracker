@@ -189,7 +189,7 @@ private fun ScannerHeader(
                 color = TextPrimary
             )
             Text(
-                text = "Deteksi sinyal Bluetooth real-time",
+                text = "Deteksi Sinyal Bluetooth Realtime",
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextSecondary
             )

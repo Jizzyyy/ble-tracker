@@ -44,10 +44,14 @@ class ScannerViewModel(
         bleRepository.isBluetoothEnabled,
         filterFlow
     ) { rawDevices, isScanning, repoError, isBtEnabled, filter ->
+        val query = filter.query.trim()
+        val queryNoColon = query.replace(":", "")
+
         val filtered = rawDevices.filter { device ->
-            val matchesQuery = filter.query.isBlank() ||
-                (device.name?.contains(filter.query, ignoreCase = true) == true) ||
-                device.address.contains(filter.query, ignoreCase = true)
+            val matchesQuery = query.isBlank() ||
+                device.displayName.contains(query, ignoreCase = true) ||
+                device.address.contains(query, ignoreCase = true) ||
+                (queryNoColon.isNotBlank() && device.address.replace(":", "").contains(queryNoColon, ignoreCase = true))
 
             val matchesThreshold = device.smoothedRssi >= filter.threshold
             matchesQuery && matchesThreshold
