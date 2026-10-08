@@ -7,6 +7,7 @@ import com.bletracker.data.repository.BleRepositoryImpl
 import com.bletracker.data.repository.HistoryRepositoryImpl
 import com.bletracker.domain.repository.BleRepository
 import com.bletracker.domain.repository.HistoryRepository
+import com.bletracker.ui.radar.RadarViewModel
 import com.bletracker.ui.scanner.ScannerViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -31,6 +32,7 @@ val repositoryModule = module {
 
 val viewModelModule = module {
     viewModel { ScannerViewModel(get()) }
+    viewModel { (address: String) -> RadarViewModel(targetAddress = address, bleRepository = get()) }
 }
 
 val appModules = listOf(databaseModule, repositoryModule, viewModelModule)
