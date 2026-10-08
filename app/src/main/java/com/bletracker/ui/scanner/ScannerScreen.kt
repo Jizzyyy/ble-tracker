@@ -254,13 +254,15 @@ private fun ScanControlButton(
         Icon(
             imageVector = if (isScanning) Icons.Default.Stop else Icons.Default.PlayArrow,
             contentDescription = null,
+            tint = Color.White,
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = if (isScanning) "Hentikan Pemindaian" else "Mulai Pemindaian BLE",
             fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            color = Color.White
         )
     }
 }
