@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,8 +20,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -116,11 +122,13 @@ fun RadarScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Status Banner
+        // Status Banner with Live Tracking / History Snapshot indicator
         ConnectionStatusCard(
             status = uiState.connectionStatus,
+            isScanning = uiState.isScanning,
             isLost = isLost,
-            secondsAgo = uiState.secondsSinceLastUpdate
+            lastSeenFormatted = uiState.lastSeenFormatted,
+            onToggleScan = { viewModel.toggleScan() }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -159,12 +167,26 @@ fun RadarScreen(
 @Composable
 private fun ConnectionStatusCard(
     status: String,
+    isScanning: Boolean,
     isLost: Boolean,
-    secondsAgo: Long
+    lastSeenFormatted: String,
+    onToggleScan: () -> Unit
 ) {
-    val bgColor = if (isLost) Color(0xFFFEF2F2) else Color(0xFFECFDF5)
-    val borderColor = if (isLost) Color(0xFFFEE2E2) else Color(0xFFD1FAE5)
-    val iconColor = if (isLost) ZoneVeryWeak else ZoneImmediate
+    val bgColor = when {
+        !isScanning -> SurfaceSubtle
+        isLost -> Color(0xFFFEF2F2)
+        else -> Color(0xFFECFDF5)
+    }
+    val borderColor = when {
+        !isScanning -> SurfaceBorderLight
+        isLost -> Color(0xFFFEE2E2)
+        else -> Color(0xFFD1FAE5)
+    }
+    val iconColor = when {
+        !isScanning -> PrimaryBlue
+        isLost -> ZoneVeryWeak
+        else -> ZoneImmediate
+    }
 
     Row(
         modifier = Modifier
@@ -176,10 +198,14 @@ private fun ConnectionStatusCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = if (isLost) Icons.Default.Warning else Icons.Default.Info,
+            imageVector = when {
+                !isScanning -> Icons.Default.History
+                isLost -> Icons.Default.Warning
+                else -> Icons.Default.Info
+            },
             contentDescription = null,
             tint = iconColor,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -190,9 +216,34 @@ private fun ConnectionStatusCard(
                 color = TextPrimary
             )
             Text(
-                text = if (secondsAgo == 0L) "Update real-time aktif" else "Paket terakhir $secondsAgo detik lalu",
+                text = if (isScanning) "Pelacakan sinyal real-time aktif" else "Terakhir terlihat: $lastSeenFormatted",
                 fontSize = 10.sp,
                 color = TextSecondary
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(
+            onClick = onToggleScan,
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isScanning) ZoneVeryWeak else PrimaryBlue,
+                contentColor = Color.White
+            ),
+            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+            modifier = Modifier.height(32.dp)
+        ) {
+            Icon(
+                imageVector = if (isScanning) Icons.Default.Stop else Icons.Default.PlayArrow,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(14.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = if (isScanning) "Hentikan" else "Lacak",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White
             )
         }
     }

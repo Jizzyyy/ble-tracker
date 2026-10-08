@@ -17,6 +17,9 @@ interface DeviceDao {
     @Query("SELECT * FROM device_history ORDER BY lastSeenTimestamp DESC")
     fun getAllDevices(): Flow<List<DeviceEntity>>
 
+    @Query("SELECT * FROM device_history WHERE address = :address LIMIT 1")
+    suspend fun getDeviceByAddress(address: String): DeviceEntity?
+
     @Query("DELETE FROM device_history")
     suspend fun clearAll()
 }

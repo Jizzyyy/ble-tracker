@@ -281,7 +281,7 @@ private fun SearchInputBar(
             .border(1.dp, SurfaceBorderLight, RoundedCornerShape(12.dp)),
         placeholder = {
             Text(
-                text = "Cari nama perangkat atau MAC address...",
+                text = "Cari nama perangkat/MAC address",
                 color = TextTertiary,
                 fontSize = 13.sp
             )

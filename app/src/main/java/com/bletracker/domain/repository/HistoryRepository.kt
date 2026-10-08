@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface HistoryRepository {
     fun getHistoryDevices(): Flow<List<BleDevice>>
+    suspend fun getDevice(address: String): BleDevice?
     suspend fun saveDevice(device: BleDevice)
     suspend fun clearHistory()
 }

@@ -18,6 +18,10 @@ class HistoryRepositoryImpl(
         }
     }
 
+    override suspend fun getDevice(address: String): BleDevice? {
+        return deviceDao.getDeviceByAddress(address)?.toDomainModel()
+    }
+
     override suspend fun saveDevice(device: BleDevice) {
         deviceDao.upsertDevice(device.toEntity())
     }

@@ -33,7 +33,7 @@ val repositoryModule = module {
 
 val viewModelModule = module {
     viewModel { ScannerViewModel(get()) }
-    viewModel { (address: String) -> RadarViewModel(targetAddress = address, bleRepository = get()) }
+    viewModel { (address: String) -> RadarViewModel(targetAddress = address, bleRepository = get(), historyRepository = get()) }
     viewModel { HistoryViewModel(get()) }
 }
 
