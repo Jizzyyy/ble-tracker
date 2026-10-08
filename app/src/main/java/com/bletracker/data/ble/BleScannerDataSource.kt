@@ -42,8 +42,17 @@ class BleScannerDataSource(
             }
         }
         try {
-            context.applicationContext.registerReceiver(receiver, filter)
-        } catch (_: Exception) {}
+            androidx.core.content.ContextCompat.registerReceiver(
+                context.applicationContext,
+                receiver,
+                filter,
+                androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
+            )
+        } catch (_: Exception) {
+            try {
+                context.applicationContext.registerReceiver(receiver, filter)
+            } catch (_: Exception) {}
+        }
     }
 
     fun refreshBluetoothStatus() {

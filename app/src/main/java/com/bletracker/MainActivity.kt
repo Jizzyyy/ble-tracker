@@ -101,26 +101,7 @@ fun MainAppContent() {
         scannerViewModel.refreshBluetoothStatus()
     }
 
-    // Bluetooth state receiver to detect user turning BT off/on dynamically
-    DisposableEffect(context) {
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(c: Context?, intent: Intent?) {
-                if (intent?.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
-                    scannerViewModel.refreshBluetoothStatus()
-                }
-            }
-        }
-        val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
-        context.registerReceiver(receiver, filter)
-
-        onDispose {
-            try {
-                context.unregisterReceiver(receiver)
-            } catch (_: Exception) {}
-        }
-    }
-
-    // App Lifecycle Handler: stop scanning when app is moved to background
+    // App Lifecycle Handler: stop scanning when app is moved to background, refresh BT status on resume
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
