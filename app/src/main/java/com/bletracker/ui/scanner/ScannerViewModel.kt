@@ -14,6 +14,7 @@ data class ScannerUiState(
     val devices: List<BleDevice> = emptyList(),
     val totalDiscoveredCount: Int = 0,
     val isScanning: Boolean = false,
+    val isBluetoothEnabled: Boolean = true,
     val searchQuery: String = "",
     val rssiThreshold: Int = -100,
     val error: String? = null
@@ -26,6 +27,7 @@ class ScannerViewModel(
     private val _searchQuery = MutableStateFlow("")
     private val _rssiThreshold = MutableStateFlow(-100)
     private val _dismissedError = MutableStateFlow<String?>(null)
+    private val _bluetoothEnabled = MutableStateFlow(bleRepository.isBluetoothEnabled)
 
     val uiState: StateFlow<ScannerUiState> = combine(
         bleRepository.devices,
@@ -49,6 +51,7 @@ class ScannerViewModel(
             devices = filtered,
             totalDiscoveredCount = rawDevices.size,
             isScanning = isScanning,
+            isBluetoothEnabled = _bluetoothEnabled.value,
             searchQuery = query,
             rssiThreshold = threshold,
             error = activeError
@@ -56,8 +59,12 @@ class ScannerViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ScannerUiState()
+        initialValue = ScannerUiState(isBluetoothEnabled = bleRepository.isBluetoothEnabled)
     )
+
+    fun refreshBluetoothStatus() {
+        _bluetoothEnabled.value = bleRepository.isBluetoothEnabled
+    }
 
     fun startScan() {
         _dismissedError.value = null

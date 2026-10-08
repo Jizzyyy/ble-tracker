@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bletracker.ui.components.BleRequirementCard
 import com.bletracker.ui.components.DeviceCard
 import com.bletracker.ui.theme.BackgroundDark
 import com.bletracker.ui.theme.PrimaryCyan
@@ -71,6 +72,7 @@ import com.bletracker.ui.theme.ZoneVeryWeak
 fun ScannerScreen(
     viewModel: ScannerViewModel,
     onDeviceClick: (String) -> Unit,
+    onEnableBluetooth: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -89,7 +91,16 @@ fun ScannerScreen(
             totalFound = uiState.totalDiscoveredCount
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // Permissions & Bluetooth Requirements
+        BleRequirementCard(
+            isBluetoothEnabled = uiState.isBluetoothEnabled,
+            onEnableBluetooth = onEnableBluetooth,
+            onPermissionsGranted = { viewModel.refreshBluetoothStatus() }
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Control Button (Start / Stop)
         ScanControlButton(

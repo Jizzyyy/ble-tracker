@@ -33,6 +33,9 @@ class BleRepositoryImpl(
     private val _scanError = MutableStateFlow<String?>(null)
     override val scanError: StateFlow<String?> = _scanError.asStateFlow()
 
+    override val isBluetoothEnabled: Boolean
+        get() = scannerDataSource.isBluetoothEnabled
+
     private var scanJob: Job? = null
 
     @SuppressLint("MissingPermission")
