@@ -7,7 +7,9 @@ import com.bletracker.data.repository.BleRepositoryImpl
 import com.bletracker.data.repository.HistoryRepositoryImpl
 import com.bletracker.domain.repository.BleRepository
 import com.bletracker.domain.repository.HistoryRepository
+import com.bletracker.ui.scanner.ScannerViewModel
 import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val databaseModule = module {
@@ -27,4 +29,8 @@ val repositoryModule = module {
     single<BleRepository> { BleRepositoryImpl(get(), get()) }
 }
 
-val appModules = listOf(databaseModule, repositoryModule)
+val viewModelModule = module {
+    viewModel { ScannerViewModel(get()) }
+}
+
+val appModules = listOf(databaseModule, repositoryModule, viewModelModule)
