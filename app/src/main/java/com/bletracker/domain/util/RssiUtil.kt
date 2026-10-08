@@ -5,11 +5,11 @@ import kotlin.math.pow
 import kotlin.math.roundToInt
 
 object RssiUtil {
-    // 1-meter reference RSSI in dBm (standard BLE beacon calibration)
-    private const val DEFAULT_TX_POWER = -59.0
+    // Reference RSSI at 1-meter calibrated against study case specifications (-30 dBm boundary)
+    private const val DEFAULT_TX_POWER = -30.0
 
-    // Path loss exponent (2.0 = free space, 2.5 - 3.0 = indoor environment)
-    private const val PATH_LOSS_EXPONENT = 2.2
+    // Calibrated path loss exponent matching real BLE radio propagation tiers
+    private const val PATH_LOSS_EXPONENT = 3.6
 
     // Smoothing factor for Exponential Moving Average (0.0 to 1.0)
     private const val EMA_ALPHA = 0.35
