@@ -141,8 +141,8 @@ fun ScannerScreen(
 
         // Device List / Skeleton / Empty State
         when {
-            uiState.isScanning && uiState.devices.isEmpty() && uiState.searchQuery.isBlank() && uiState.rssiThreshold <= -100 -> {
-                // Skeleton loading state while scanning for nearby devices
+            uiState.isScanning && uiState.isInitialLoading && uiState.devices.isEmpty() && uiState.searchQuery.isBlank() && uiState.rssiThreshold <= -100 -> {
+                // Skeleton loading state only during initial countdown (first 5 seconds)
                 ScannerSkeletonList(count = 3, modifier = Modifier.padding(vertical = 8.dp))
             }
             uiState.devices.isEmpty() -> {
@@ -437,7 +437,7 @@ private fun EmptyDevicePlaceholder(
             Text(
                 text = when {
                     hasFilter -> "Tidak ada perangkat yang cocok"
-                    isScanning -> "Mencari perangkat BLE di sekitar..."
+                    isScanning -> "Tidak Ada Sinyal Bluetooth Terdeteksi"
                     else -> "Pemindaian Belum Dimulai"
                 },
                 fontSize = 15.sp,
@@ -448,7 +448,7 @@ private fun EmptyDevicePlaceholder(
             Text(
                 text = when {
                     hasFilter -> "Coba kurangi ambang batas sinyal atau periksa kata kunci pencarian."
-                    isScanning -> "Pastikan perangkat Bluetooth di dekatmu dalam mode broadcast/advertising."
+                    isScanning -> "Pemindaian aktif berjalan di sekitar, namun belum ada perangkat Bluetooth yang tertangkap. Pastikan perangkat target berada dalam jangkauan dan memancarkan sinyal."
                     else -> "Tekan tombol Mulai Pemindaian di atas untuk memulai pencarian."
                 },
                 fontSize = 12.sp,
