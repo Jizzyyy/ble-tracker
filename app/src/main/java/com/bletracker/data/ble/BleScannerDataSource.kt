@@ -10,11 +10,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
 
 class BleScannerDataSource(
@@ -104,6 +106,7 @@ class BleScannerDataSource(
                     else -> "Pemindaian gagal (Kode: $errorCode)"
                 }
                 trySend(BleScanEvent.Error(message))
+                channel.close()
             }
         }
 
@@ -111,11 +114,11 @@ class BleScannerDataSource(
             scanner.startScan(null, settings, callback)
         } catch (e: SecurityException) {
             trySend(BleScanEvent.Error("Izin Bluetooth belum diberikan: ${e.message}"))
-            close(e)
+            channel.close()
             return@callbackFlow
         } catch (e: Exception) {
             trySend(BleScanEvent.Error("Gagal memulai scan: ${e.message}"))
-            close(e)
+            channel.close()
             return@callbackFlow
         }
 
@@ -126,7 +129,7 @@ class BleScannerDataSource(
             } catch (_: Exception) {
             }
         }
-    }
+    }.buffer(Channel.UNLIMITED)
 }
 
 sealed interface BleScanEvent {

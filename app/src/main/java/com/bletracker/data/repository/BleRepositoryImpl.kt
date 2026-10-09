@@ -13,6 +13,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
@@ -43,63 +44,70 @@ class BleRepositoryImpl(
 
     @SuppressLint("MissingPermission")
     override fun startScan() {
-        if (_isScanning.value) return
+        if (_isScanning.value && scanJob?.isActive == true) return
 
         _scanError.value = null
         _isScanning.value = true
 
         scanJob?.cancel()
         scanJob = scope.launch {
-            scannerDataSource.scanBle().collect { event ->
-                when (event) {
-                    is BleScanEvent.DeviceDiscovered -> {
-                        val result = event.scanResult
-                        val address = result.device.address ?: return@collect
-                        val rawName = try {
-                            result.device.name ?: result.scanRecord?.deviceName
-                        } catch (_: SecurityException) {
-                            result.scanRecord?.deviceName
-                        }
-                        val rawRssi = result.rssi
+            try {
+                scannerDataSource.scanBle()
+                    .catch { e ->
+                        _scanError.value = e.message ?: "Kesalahan pemindaian BLE"
+                    }
+                    .collect { event ->
+                        when (event) {
+                            is BleScanEvent.DeviceDiscovered -> {
+                                val result = event.scanResult
+                                val address = result.device.address ?: return@collect
+                                val rawName = try {
+                                    result.device.name ?: result.scanRecord?.deviceName
+                                } catch (_: SecurityException) {
+                                    result.scanRecord?.deviceName
+                                }
+                                val rawRssi = result.rssi
 
-                        val existing = deviceCache[address]
-                        val smoothed = if (existing != null) {
-                            RssiUtil.smoothRssi(existing.smoothedRssi, rawRssi)
-                        } else {
-                            rawRssi
-                        }
+                                val existing = deviceCache[address]
+                                val smoothed = if (existing != null) {
+                                    RssiUtil.smoothRssi(existing.smoothedRssi, rawRssi)
+                                } else {
+                                    rawRssi
+                                }
 
-                        val distance = RssiUtil.estimateDistance(smoothed)
-                        val zone = RssiUtil.classifyZone(smoothed)
-                        val deviceName = rawName ?: existing?.name
+                                val distance = RssiUtil.estimateDistance(smoothed)
+                                val zone = RssiUtil.classifyZone(smoothed)
+                                val deviceName = rawName ?: existing?.name
 
-                        val updatedDevice = BleDevice(
-                            name = deviceName,
-                            address = address,
-                            rssi = rawRssi,
-                            smoothedRssi = smoothed,
-                            estimatedDistance = distance,
-                            zone = zone,
-                            lastSeenTimestamp = System.currentTimeMillis()
-                        )
+                                val updatedDevice = BleDevice(
+                                    name = deviceName,
+                                    address = address,
+                                    rssi = rawRssi,
+                                    smoothedRssi = smoothed,
+                                    estimatedDistance = distance,
+                                    zone = zone,
+                                    lastSeenTimestamp = System.currentTimeMillis()
+                                )
 
-                        deviceCache[address] = updatedDevice
+                                deviceCache[address] = updatedDevice
 
-                        // Auto-sort descending by strongest signal (RSSI highest)
-                        _devices.value = deviceCache.values
-                            .sortedByDescending { it.smoothedRssi }
+                                // Auto-sort descending by strongest signal (RSSI highest)
+                                _devices.value = deviceCache.values
+                                    .sortedByDescending { it.smoothedRssi }
 
-                        // Persist to local database
-                        launch(Dispatchers.IO) {
-                            historyRepository.saveDevice(updatedDevice)
+                                // Persist to local database
+                                launch(Dispatchers.IO) {
+                                    historyRepository.saveDevice(updatedDevice)
+                                }
+                            }
+
+                            is BleScanEvent.Error -> {
+                                _scanError.value = event.message
+                            }
                         }
                     }
-
-                    is BleScanEvent.Error -> {
-                        _scanError.value = event.message
-                        _isScanning.value = false
-                    }
-                }
+            } finally {
+                _isScanning.value = false
             }
         }
     }
